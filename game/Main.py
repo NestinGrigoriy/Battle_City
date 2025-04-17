@@ -1,0 +1,152 @@
+from EndGame import end_screen
+from StartLevel import start_level
+from StartWindow import start_window
+
+
+def main():
+    """
+    Главная функция отвечает за запуск уровнений и доп экранов
+    """
+    map_level_1 = [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "b                r                  r          b",
+        "b    !    !  3   rbbbbbbbbbbbbbbbbbbr       3  b",
+        "b                                              b",
+        "b                @    2   @#        #          b",
+        "b    ! 2  !                            $       b",
+        "b                rbbbbbbbbbbbbbbbbbbr       2  b",
+        "b    wwwwww      r                  r          b",
+        "b 3  wwwwww      r                  r          b",
+        "b    wwwwww      r                  r          b",
+        "b  rrrrrrrr      r                  r          b",
+        "b  r             r                  r          b",
+        "b  r             r                  r  $       b",
+        "b  r             r                  rrrr   rrrrb",
+        "b  r             rp                    r       b",
+        "b  r       h     rp                    r       b",
+        "b  r             rp                    r       b",
+        "brrr   rrrrrrrrrrrpiiiiiiiiiiiiiiiiiiiirrrrr v b",
+        "b             ppppp                            b",
+        "b                                              b",
+        "b                        u                     b",
+        "b               a                ppppppppppppppb",
+        "bpppppppppp           sssssss    pwwwwwwwwwwwwwb",
+        "bwwwwwwwwwp           s     s    pwwwwwwwwwwwwwb",
+        "bwwwwwwwwwp           s  d  s    pwwwwwwwwwwwwwb",
+        "bwwwwwwwwwp           s     s    pwwwwwwwwwwwwwb",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]
+    map_level_2 = [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "b                                              b",
+        "b   2  @              3                  @  2  b",
+        "b                                              b",
+        "b         h                                    b",
+        "b     !                                  $     b",
+        "b           ppppppppp    pppppppppp            b",
+        "b           pwwwwwwww    wwwwwwwwwp            b",
+        "b           pww                 wwp      v     b",
+        "b           pww                 wwp            b",
+        "b           pww     sssssss     wwp            b",
+        "b                   s     s                    b",
+        "b      3            s  d  s                 3  b",
+        "b                   s     s                    b",
+        "b                   sssssss                    b",
+        "b           pww                 wwp            b",
+        "b           pww        u        wwp            b",
+        "b           pww                 wwp            b",
+        "b           pwwwwwwww     wwwwwwwwp            b",
+        "b           ppppppppppppppppppppppp            b",
+        "b     !                                        b",
+        "b                        3                     b",
+        "b           a                             $    b",
+        "b                      2                       b",
+        "b    #                                   #     b",
+        "b                                              b",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]
+
+    map_level_3 = [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "b                               b    iiiwiiiiiib",
+        "b     @        3             @  b    iiiiiiwiiib",
+        "b                               b    iiiiwiiiiib",
+        "b      2       b                b           wwwb",
+        "b              b        b               !   wwwb",
+        "bbbbbbbbbbbbbbbb   2    b                   wwwb",
+        "b              b        b               h   wwwb",
+        "b              bbpppppppppppppppppp            b",
+        "b                pwwwwwwwwwwwwwwwwp            b",
+        "bssss            pwwwwwwwwwwwwwwwwp            b",
+        "b   s            pwwwwwwwwwwwwwwwwp      3     b",
+        "b d s   u        pwwwwwwwwwwwwwwwwp            b",
+        "b   s            pwwwwwwwwwwwwwwwwp            b",
+        "bssss            pwwwwwwwwwwwwwwwwp            b",
+        "b                pwwwwwwwwwwwwwwwwp            b",
+        "b                pppppppppppppppppppppp        b",
+        "b                                              b",
+        "b     $                  $                     b",
+        "b                        v                     b",
+        "b     $                  $       pppp   !      b",
+        "b                                rwwp          b",
+        "brrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrwwp   a      b",
+        "b                                rppp          b",
+        "b     #      2             3              #    b",
+        "b                                              b",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]
+
+    map_level_4 = [
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "biiwwiw          ppppppppppppp           wiwiiwb",
+        "bwiwiwi  #        ppwwwwwwwwwpp       $  wiwiwib",
+        "bwiwiwi      2    ppwwwwwwwpp     2      wiwiwib",
+        "b                  ppwwwwwpp                   b",
+        "b       3     pppp  ppwwwpp  pppp         3    b",
+        "b               ppppppppppppppp                b",
+        "b             pppp  ppwwwpp  pppp              b",
+        "b                  ppwwwwwpp                   b",
+        "b                 ppwwwwwwwpp                  b",
+        "b                ppwwwwwwwwwpp                 b",
+        "b                ppppppppppppp                 b",
+        "b                                     $        b",
+        "b        #      h              v               b",
+        "b                                              b",
+        "bbbbbbbbbbbbbbbbbb     a    bbbbbbbbbbbbbbbbbbbb",
+        "bwwwwwwwwwwwwwwwwb          bwwwwwwwwwwwwwwwwwwb",
+        "bwwwwwwwwwwwwwwwwb          bwwwwwwwwwwwwwwwwwwb",
+        "bbbbbbbbbbbbbbbbbb          bbbbbbbbbbbbbbbbbbbb",
+        "bwi                                         wiwb",
+        "bwi                    u                    iwib",
+        "b   !          !                 @         @   b",
+        "b     ppprrppp      sssssss        pprrpp      b",
+        "b   ppppprrppppp    s     s      pppprrpppp    b",
+        "b   rrrrrrrrrrrr    s  d  s      rrrrrrrrrr    b",
+        "b   rrrrrrrrrrrr    s     s   3  rrrrrrrrrr  2 b",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]
+
+    status = start_window()
+    while True:
+        if "play" in status:
+            if status == "play1":
+                status = start_level(map_level_1, "1")
+            if status == "play2":
+                status = start_level(map_level_2, "2")
+            if status == "play3":
+                status = start_level(map_level_3, "3")
+            if status == "play4":
+                status = start_level(map_level_4, "4")
+        if status == "menu":
+            status = start_window()
+        if status == "next1":
+            status = "play2"
+        if status == "next2":
+            status = "play3"
+        if status == "next3":
+            status = "play4"
+        if status == "next4":
+            status = end_screen()
+
+
+main()
