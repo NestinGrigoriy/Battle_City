@@ -1,9 +1,10 @@
 import ctypes
 
 import pygame
+from states import States
 
 
-def start_window():
+def start_window() -> States:
     """
     Отрисовывает главное(стартовое) окно
     :return: Нажал ли пользователь кнопку играть(переход к первому урвоню)
@@ -16,38 +17,22 @@ def start_window():
     pygame.display.set_caption("Battle City")
     running = True
 
-    button_play_image = pygame.image.load(
-        "../main_menu_images/button_play.png"
-    )
-    button_play_image2 = pygame.image.load(
-        "../main_menu_images/main_menu2.jpg"
-    )
+    button_play_image = pygame.image.load("../main_menu_images/button_play.png")
+    button_play_image2 = pygame.image.load("../main_menu_images/main_menu2.jpg")
     main_menu_image = pygame.image.load("../main_menu_images/main_menu1.jpg")
-    button_exit_image = pygame.image.load(
-        "../main_menu_images/exit_button_sost1.jpg"
-    )
-    button_exit_image2 = pygame.image.load(
-        "../main_menu_images/button_exit_sost2.jpg"
-    )
+    button_exit_image = pygame.image.load("../main_menu_images/exit_button_sost1.jpg")
+    button_exit_image2 = pygame.image.load("../main_menu_images/button_exit_sost2.jpg")
 
     main_menu_image = pygame.transform.scale(main_menu_image, (1920, 1080))
-    button_play_image2 = pygame.transform.scale(
-        button_play_image2, (1920, 1080)
-    )
+    button_play_image2 = pygame.transform.scale(button_play_image2, (1920, 1080))
 
     button_play_image = pygame.transform.scale(button_play_image, (250, 100))
     button_exit_image = pygame.transform.scale(button_exit_image, (200, 100))
     button_exit_image2 = pygame.transform.scale(button_exit_image2, (200, 200))
 
-    button_exit_pos1 = button_exit_image.get_rect(
-        center=(width // 2, height // 2 + 150)
-    )
-    button_exit_pos2 = button_exit_image2.get_rect(
-        center=(width // 2, height // 2 + 250)
-    )
-    button_play_pos = button_play_image.get_rect(
-        center=(width // 2, height // 2)
-    )
+    button_exit_pos1 = button_exit_image.get_rect(center=(width // 2, height // 2 + 150))
+    button_exit_pos2 = button_exit_image2.get_rect(center=(width // 2, height // 2 + 250))
+    button_play_pos = button_play_image.get_rect(center=(width // 2, height // 2))
 
     while running:
         for event in pygame.event.get():
@@ -64,7 +49,7 @@ def start_window():
 
         if button_play_pos.collidepoint(mouse_pos):
             if pygame.mouse.get_pressed()[0]:
-                return "play1"
+                return States.PLAY_1
 
         if button_play_pos.collidepoint(mouse_pos):
             screen.blit(button_play_image2, (0, 0))

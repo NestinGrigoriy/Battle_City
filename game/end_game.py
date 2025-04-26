@@ -1,9 +1,10 @@
 import ctypes
 
 import pygame
+from states import States
 
 
-def end_screen():
+def end_screen() -> States:
     """
     Отображает экран прохождения игры
     :return статус экрана:
@@ -29,7 +30,7 @@ def end_screen():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if back_rect.collidepoint(mouse_pos):
-                    return "menu"
+                    return States.MENU
             if event.type == pygame.QUIT:
                 running = False
         screen.blit(end_image, end_rect)

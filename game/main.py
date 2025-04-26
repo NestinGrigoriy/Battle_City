@@ -1,6 +1,7 @@
-from EndGame import end_screen
-from StartLevel import start_level
-from StartWindow import start_window
+from end_game import end_screen
+from start_level import start_level
+from start_window import start_window
+from states import States
 
 
 def main():
@@ -128,24 +129,24 @@ def main():
 
     status = start_window()
     while True:
-        if "play" in status:
-            if status == "play1":
+        if "play" in status.value:
+            if status == States.PLAY_1:
                 status = start_level(map_level_1, "1")
-            if status == "play2":
+            if status == States.PLAY_2:
                 status = start_level(map_level_2, "2")
-            if status == "play3":
+            if status == States.PLAY_3:
                 status = start_level(map_level_3, "3")
-            if status == "play4":
+            if status == States.PLAY_4:
                 status = start_level(map_level_4, "4")
-        if status == "menu":
+        if status == States.MENU:
             status = start_window()
-        if status == "next1":
-            status = "play2"
-        if status == "next2":
-            status = "play3"
-        if status == "next3":
-            status = "play4"
-        if status == "next4":
+        if status == States.NEXT_1:
+            status = States.PLAY_2
+        if status == States.NEXT_2:
+            status = States.PLAY_3
+        if status == States.NEXT_3:
+            status = States.PLAY_4
+        if status == States.NEXT_4:
             status = end_screen()
 
 
