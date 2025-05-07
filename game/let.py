@@ -1,6 +1,14 @@
-from dataclasses import dataclass, field
+import os
+from dataclasses import dataclass
 
 import pygame
+
+
+def load_image(filename):
+    """Загружает изображение"""
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    image_path = os.path.join(base_dir, "game_images", filename)
+    return pygame.image.load(image_path)
 
 
 @dataclass
@@ -13,8 +21,7 @@ class Let:
     _x: int
     _y: int
     _size: int = 40
-    _image: pygame.Surface = field(default=None, init=False)
-    _transform_image: pygame.Surface = field(default=None, init=False)
+    _transform_image: pygame.Surface = None
 
     def __post_init__(self):
         """
@@ -63,8 +70,8 @@ class Brick(Let):
         Инициализация изображения кирпича.
         """
         super().__post_init__()
-        brick_image = pygame.image.load("../game_images/brick.png")
-        self._transform_image = pygame.transform.scale(brick_image, (self._size, self._size))
+        image = load_image("brick.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -78,8 +85,8 @@ class Ice(Let):
         Инициализация изображения льда.
         """
         super().__post_init__()
-        ice_image = pygame.image.load("../game_images/ice.png")
-        self._transform_image = pygame.transform.scale(ice_image, (self._size, self._size))
+        image = load_image("ice.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -93,8 +100,8 @@ class Water(Let):
         Инициализация изображения воды.
         """
         super().__post_init__()
-        water_image = pygame.image.load("../game_images/water.png")
-        self._transform_image = pygame.transform.scale(water_image, (self._size, self._size))
+        image = load_image("water.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -108,8 +115,8 @@ class Plant(Let):
         Инициализация изображения растения.
         """
         super().__post_init__()
-        plant_image = pygame.image.load("../game_images/plant.png")
-        self._transform_image = pygame.transform.scale(plant_image, (self._size, self._size))
+        image = load_image("plant.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -123,5 +130,5 @@ class Rock(Let):
         Инициализация изображения камня.
         """
         super().__post_init__()
-        rock_image = pygame.image.load("../game_images/rock.jpg")
-        self._transform_image = pygame.transform.scale(rock_image, (self._size, self._size))
+        image = load_image("rock.jpg")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
