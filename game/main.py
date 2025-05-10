@@ -1,3 +1,6 @@
+import os
+
+import pygame
 from end_game import end_screen
 from start_level import start_level
 from start_window import start_window
@@ -127,8 +130,16 @@ def main():
         "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     ]
 
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    background_music_path = os.path.join(base_dir, "sounds", "background_music.mp3")
+    pygame.mixer.music.load(background_music_path)
+    pygame.mixer.music.set_volume(0.25)
+
+    pygame.mixer.music.play(-1)
     status = start_window()
     while True:
+        if status == States.SAVE:
+            status = start_level(None, None)
         if "play" in status.value:
             if status == States.PLAY_1:
                 status = start_level(map_level_1, "1")

@@ -29,9 +29,15 @@ class PatrolStrategy:
         self._fin_x = fin_x
         self._fin_y = fin_y
         self._angle = 0
-        self._image = pygame.image.load("../game_images/opponent_tank.png")
-        self._transform_image = pygame.transform.scale(self._image, (75, 75))
+        self._image = None
+        self._transform_image = None
         self._current_axis = "_x"  # Текущая ось движения ('_x' или '_y')
+        self.load_image()
+
+    def load_image(self):
+        """Загружает изображение"""
+        self._image = pygame.image.load(r"C:\Users\Geshka\PycharmProjects\Battle_City\game_images\opponent_tank.png")
+        self._transform_image = pygame.transform.scale(self._image, (75, 75))
 
     def get_x(self) -> int:
         """Геттер"""
@@ -139,11 +145,17 @@ class AttackerStrategy:
         self._fin_x = fin_x
         self._fin_y = fin_y
         self._angle = 0
-        self._image = pygame.image.load("../game_images/opponent_tank.png")
-        self._transform_image = pygame.transform.scale(self._image, (75, 75))
+        self._image = None
+        self._transform_image = None
         self._old_x = x
         self._old_y = y
         self._path = None
+        self.load_image()
+
+    def load_image(self):
+        """Загружает изображение"""
+        self._image = pygame.image.load(r"C:\Users\Geshka\PycharmProjects\Battle_City\game_images\opponent_tank.png")
+        self._transform_image = pygame.transform.scale(self._image, (75, 75))
 
     def get_x(self) -> int:
         """Геттер"""
@@ -305,15 +317,20 @@ class ChaserStrategy:
         self._x = x
         self._y = y
         self._angle = 0
-        self._image = pygame.image.load("../game_images/opponent_tank.png")
-        self._transform_image = pygame.transform.scale(self._image, (75, 75))
         self._grid = None
         self._path = None
         self._target_x = x
         self._target_y = y
         self._updatable = False
-
         self.create_grid(map_data)
+        self._image = None
+        self._transform_image = None
+        self.load_image()
+
+    def load_image(self):
+        """Загружает изображение"""
+        self._image = pygame.image.load(r"C:\Users\Geshka\PycharmProjects\Battle_City\game_images\opponent_tank.png")
+        self._transform_image = pygame.transform.scale(self._image, (75, 75))
 
     def get_x(self) -> int:
         """Геттер"""
