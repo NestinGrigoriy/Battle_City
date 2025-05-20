@@ -1,6 +1,15 @@
-from dataclasses import dataclass, field
+import os
+from dataclasses import dataclass
+from typing import Optional
 
 import pygame
+
+
+def load_image(filename: str) -> pygame.Surface:
+    """Загружает изображение"""
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    image_path = os.path.join(base_dir, "game_images", filename)
+    return pygame.image.load(image_path)
 
 
 @dataclass
@@ -13,25 +22,24 @@ class Let:
     _x: int
     _y: int
     _size: int = 40
-    _image: pygame.Surface = field(default=None, init=False)
-    _transform_image: pygame.Surface = field(default=None, init=False)
+    _transform_image: Optional[pygame.Surface] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация дополнительных атрибутов после создания объекта.
         """
-        self._image = None
+        self._image = None  # можно удалить, если не используется
         self._transform_image = None
 
     def get_strength(self) -> int:
         """Геттер"""
         return self._strength
 
-    def set_strength(self, strength: int):
+    def set_strength(self, strength: int) -> None:
         """Сеттер"""
         self._strength = strength
 
-    def set_x(self, x: int):
+    def set_x(self, x: int) -> None:
         """Сеттер"""
         self._x = x
 
@@ -39,7 +47,7 @@ class Let:
         """Геттер"""
         return self._x
 
-    def set_y(self, y: int):
+    def set_y(self, y: int) -> None:
         """Сеттер"""
         self._y = y
 
@@ -47,7 +55,7 @@ class Let:
         """Геттер"""
         return self._y
 
-    def get_transform_image(self) -> pygame.Surface:
+    def get_transform_image(self) -> Optional[pygame.Surface]:
         """Геттер"""
         return self._transform_image
 
@@ -58,13 +66,13 @@ class Brick(Let):
     Препятствие - кирпич
     """
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация изображения кирпича.
         """
         super().__post_init__()
-        brick_image = pygame.image.load("../game_images/brick.png")
-        self._transform_image = pygame.transform.scale(brick_image, (self._size, self._size))
+        image = load_image("brick.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -73,13 +81,13 @@ class Ice(Let):
     Препятствие - лёд
     """
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация изображения льда.
         """
         super().__post_init__()
-        ice_image = pygame.image.load("../game_images/ice.png")
-        self._transform_image = pygame.transform.scale(ice_image, (self._size, self._size))
+        image = load_image("ice.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -88,13 +96,13 @@ class Water(Let):
     Препятствие - вода
     """
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация изображения воды.
         """
         super().__post_init__()
-        water_image = pygame.image.load("../game_images/water.png")
-        self._transform_image = pygame.transform.scale(water_image, (self._size, self._size))
+        image = load_image("water.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -103,13 +111,13 @@ class Plant(Let):
     Препятствие - растение
     """
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация изображения растения.
         """
         super().__post_init__()
-        plant_image = pygame.image.load("../game_images/plant.png")
-        self._transform_image = pygame.transform.scale(plant_image, (self._size, self._size))
+        image = load_image("plant.png")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))
 
 
 @dataclass
@@ -118,10 +126,10 @@ class Rock(Let):
     Препятствие - камень
     """
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация изображения камня.
         """
         super().__post_init__()
-        rock_image = pygame.image.load("../game_images/rock.jpg")
-        self._transform_image = pygame.transform.scale(rock_image, (self._size, self._size))
+        image = load_image("rock.jpg")
+        self._transform_image = pygame.transform.scale(image, (self._size, self._size))

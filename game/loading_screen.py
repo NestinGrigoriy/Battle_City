@@ -8,7 +8,7 @@ transition_image = pygame.transform.scale(transition_image, (1920, 1080))
 
 
 # Функция для отображения экрана перехода
-def transition_screen(screen: pygame.Surface, duration=1000):
+def transition_screen(screen: pygame.Surface, duration: int = 1000) -> None:
     """
     Показывает экран перехода на заданное время.
     :param screen: экран

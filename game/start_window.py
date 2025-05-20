@@ -34,6 +34,15 @@ def start_window() -> States:
     button_exit_pos2 = button_exit_image2.get_rect(center=(width // 2, height // 2 + 250))
     button_play_pos = button_play_image.get_rect(center=(width // 2, height // 2))
 
+    button_continue_x = width // 2 - 125
+    button_continue_y = height // 2 - 150
+    button_continue_width = 250
+    button_continue_height = 100
+    button_continue_rect = pygame.Rect(
+        button_continue_x, button_continue_y, button_continue_width, button_continue_height
+    )
+    font = pygame.font.SysFont("Arial", 48)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -51,6 +60,10 @@ def start_window() -> States:
             if pygame.mouse.get_pressed()[0]:
                 return States.PLAY_1
 
+        if button_continue_rect.collidepoint(mouse_pos):
+            if pygame.mouse.get_pressed()[0]:
+                return States.SAVE
+
         if button_play_pos.collidepoint(mouse_pos):
             screen.blit(button_play_image2, (0, 0))
         else:
@@ -63,4 +76,11 @@ def start_window() -> States:
 
         screen.blit(button_play_image, button_play_pos.topleft)
         screen.blit(button_exit_image, button_exit_pos1.topleft)
+        pygame.draw.rect(screen, "gray", button_continue_rect)
+
+        text = font.render("Продолжить", True, "black")
+        text_rect = text.get_rect(
+            center=(button_continue_x + button_continue_width // 2, button_continue_y + button_continue_height // 2)
+        )
+        screen.blit(text, text_rect)
         pygame.display.flip()
