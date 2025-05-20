@@ -1,113 +1,132 @@
-import game.behavior_strategy
+from typing import Union
+
 import game.bullets
+from game.behavior_strategy import ChaserStrategy
+from game.bullets import DefaultBullet
 
 
 class DefaultTank:
-    """
-    Класс с дефолтным танком
-    """
-
-    def __init__(self, x: int, y: int, bullet: game.bullets, direction: int, strategy: game.behavior_strategy):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        bullet: DefaultBullet,
+        direction: int,
+        strategy: game.behavior_strategy.ChaserStrategy,
+    ):
         """
-        Инициализирует базовый объект танка.
-        :param x: Начальная координата X танка (int).
-        :param y: Начальная координата Y танка (int).
-        :param bullet: Объект пули, который использует танк.
-        :param direction: Направление танка (0 - вверх, 180 - вниз, 90 - влево, -90 - вправо).
-        :param strategy: Стратегия поведения танка (объект класса стратегии).
-        Атрибуты:
-            - self._direction: Направление танка.
-            - self._x: Текущая координата X танка.
-            - self._y: Текущая координата Y танка.
-            - self.bullet: Объект пули, который использует танк.
-            - self.speed: Скорость движения танка (по умолчанию 1).
-            - self.attack_speed: Скорострельность танка (по умолчанию 2.5).
-            - self.health_point: Здоровье танка (по умолчанию 80).
-            - self.armor: Броня танка (по умолчанию 0).
-            - self.strategy: Стратегия поведения танка.
-            - self.last_shot: Время последнего выстрела (по умолчанию 0).
+        Инициализатор
         """
         self._direction = direction
         self._x = x
         self._y = y
         self._bullet = bullet
-        self._speed = 1
-        self._attack_speed = 2.5
-        self._health_point = 80
-        self._armor = 0
+        self._speed: float = 1.0
+        self._attack_speed: float = 2.5
+        self._health_point: float = 80
+        self._armor: float = 0
         self._strategy = strategy
-        self._last_shot = 0
+        self._last_shot: float = 0.0
 
-    def get_x(self) -> float or int:
-        """Геттер"""
+    def get_x(self) -> Union[float, int]:
+        """
+        Геттер
+        """
         return self._x
 
-    def get_y(self) -> float or int:
-        """Геттер"""
+    def get_y(self) -> Union[float, int]:
+        """
+        Геттер
+        """
         return self._y
 
-    def get_bullet(self) -> game.bullets:
-        """Геттер"""
+    def get_bullet(self) -> DefaultBullet:
+        """
+        Геттер
+        """
         return self._bullet
 
-    def get_strategy(self) -> game.behavior_strategy:
-        """Геттер"""
+    def get_strategy(self) -> game.behavior_strategy.ChaserStrategy:
+        """
+        Геттер
+        """
         return self._strategy
 
     def get_direction(self) -> int:
-        """Геттер"""
+        """
+        Геттер
+        """
         return self._direction
 
     def get_speed(self) -> float:
-        """Геттер"""
+        """
+        Геттер
+        """
         return self._speed
 
     def get_attack_speed(self) -> float:
-        """Геттер"""
+        """
+        Геттер
+        """
         return self._attack_speed
 
-    def get_armor(self) -> int or float:
-        """Геттер"""
+    def get_armor(self) -> float:
+        """
+        Геттер
+        """
         return self._armor
 
-    def get_health_point(self) -> int or float:
-        """Геттер"""
+    def get_health_point(self) -> float:
+        """
+        Геттер
+        """
         return self._health_point
 
-    def get_last_shot(self) -> int:
-        """Геттер"""
+    def get_last_shot(self) -> float:
+        """
+        Геттер
+        """
         return self._last_shot
 
-    def set_x(self, x: int):
-        """Сеттер"""
+    def set_x(self, x: int) -> None:
+        """
+        Сеттер
+        """
         self._x = x
 
-    def set_y(self, y: int):
-        """Сеттер"""
+    def set_y(self, y: int) -> None:
+        """
+        Сеттер
+        """
         self._y = y
 
-    def set_direction(self, direction: int):
-        """Сеттер"""
+    def set_direction(self, direction: int) -> None:
+        """
+        Сеттер
+        """
         self._direction = direction
 
-    def set_speed(self, speed: int):
-        """Сеттер"""
+    def set_speed(self, speed: float) -> None:
+        """
+        Сеттер
+        """
         self._speed = speed
 
-    def set_armor(self, armor: int):
-        """Сеттер"""
+    def set_armor(self, armor: Union[int, float]) -> None:
+        """
+        Сеттер
+        """
         self._armor = armor
 
-    def set_health_point(self, hp: int):
-        """Сеттер"""
+    def set_health_point(self, hp: Union[int, float]) -> None:
+        """
+        Сеттер
+        """
         self._health_point = hp
 
-    def update_last_shot(self, time: float):
+    def update_last_shot(self, time: float) -> None:
         """
-        Обновляет время последнего выстрела.
-        :param time: Текущее время (float).
-        Действия:
-            - Устанавливает атрибут self.last_shot равным текущему времени.
+        Обновляет время последнего выстрела
         """
         self._last_shot = time
 
@@ -117,10 +136,16 @@ class PlayerTank(DefaultTank):
     Пользовательский танк
     """
 
-    def __init__(self, x: int, y: int, bullet: game.bullets, direction: int, strategy: game.behavior_strategy):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        bullet: DefaultBullet,
+        direction: int,
+        strategy: ChaserStrategy,
+    ):
         """
-        Изменяет некоторые параметры,
-        Остальное аналогично родительскому
+        Инициализатор
         """
         super().__init__(x, y, bullet, direction, strategy)
         self._speed = 2
@@ -132,10 +157,16 @@ class FastTank(DefaultTank):
     Быстрый танк
     """
 
-    def __init__(self, x: int, y: int, bullet: game.bullets, direction: int, strategy: game.behavior_strategy):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        bullet: DefaultBullet,
+        direction: int,
+        strategy: ChaserStrategy,
+    ):
         """
-        Изменяет некоторые параметры,
-        Остальное аналогично родительскому
+        Инициализатор
         """
         super().__init__(x, y, bullet, direction, strategy)
         self._speed = 1.5
@@ -146,10 +177,16 @@ class ArmorTank(DefaultTank):
     Бронированный танк
     """
 
-    def __init__(self, x: int, y: int, bullet: game.bullets, direction: int, strategy: game.behavior_strategy):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        bullet: DefaultBullet,
+        direction: int,
+        strategy: "game.behavior_strategy.ChaserStrategy",
+    ):
         """
-        Изменяет некоторые параметры,
-        Остальное аналогично родительскому
+        Инициализатор
         """
         super().__init__(x, y, bullet, direction, strategy)
         self._armor = 50
@@ -160,13 +197,18 @@ class WeakTank(DefaultTank):
     Слабый танк
     """
 
-    def __init__(self, x: int, y: int, bullet: game.bullets, direction: int, strategy: game.behavior_strategy):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        bullet: DefaultBullet,
+        direction: int,
+        strategy: "game.behavior_strategy.ChaserStrategy",
+    ):
         """
-        Изменяет некоторые параметры,
-        Остальное аналогично родительскому
+        Инициализатор
         """
         super().__init__(x, y, bullet, direction, strategy)
-        self._bullet = bullet
         self._health_point = 50
 
 
@@ -175,10 +217,16 @@ class RapidFireTank(DefaultTank):
     Скорострельный танк
     """
 
-    def __init__(self, x: int, y: int, bullet: game.bullets, direction: int, strategy: game.behavior_strategy):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        bullet: DefaultBullet,
+        direction: int,
+        strategy: ChaserStrategy,
+    ):
         """
-        Изменяет некоторые параметры,
-        Остальное аналогично родительскому
+        Инициализатор
         """
         super().__init__(x, y, bullet, direction, strategy)
         self._attack_speed = 2

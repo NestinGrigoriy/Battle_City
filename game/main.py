@@ -7,7 +7,7 @@ from start_window import start_window
 from states import States
 
 
-def main():
+def main() -> None:
     """
     Главная функция отвечает за запуск уровнений и доп экранов
     """

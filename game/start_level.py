@@ -1,11 +1,11 @@
 import ctypes
 import os
 import time
+from typing import Any, Optional, Dict, Tuple
 
 import pygame.transform
 from behavior_strategy import AttackerStrategy, ChaserStrategy, PatrolStrategy
-from bullets import (ConcretePunchingBullet, DefaultBullet, IncendiaryBullet,
-                     PlayerBullet)
+from bullets import ConcretePunchingBullet, DefaultBullet, IncendiaryBullet, PlayerBullet
 from cyclicIterator import CyclicIterator
 from let import Brick, Ice, Plant, Rock, Water
 from loading_screen import transition_screen
@@ -17,7 +17,7 @@ from game.load_data import load_data
 from game.save import save
 
 
-def start_level(map: list, level_num: str) -> States:
+def start_level(map: list[str] | None, level_num: str) -> States:
     """
     Запускает уровень
     :param map: карта уровня
@@ -120,13 +120,12 @@ def start_level(map: list, level_num: str) -> States:
     attackers_pos = []
     chaser_pos = []
     bullets = []
-    start_time = 0
+    start_time: float = 0
     update_chaser = False
-    flames = []
+    flames: list[Any] = []
     speed_pos = None
     health_pos = None
     armor_pos = None
-    bonus_pos = None
 
     if map is not None:
         map = [row[:] for row in map]
@@ -231,13 +230,14 @@ def start_level(map: list, level_num: str) -> States:
 
         attackers = []
         for pos in attackers_pos:
-            tank = ArmorTank(
-                pos[0],
-                pos[1],
-                ConcretePunchingBullet(pos[0], pos[1], 0),
-                0,
-                AttackerStrategy(pos[0], pos[1], base_pos.x, base_pos.y),
-            )
+            if base_pos is not None:
+                tank = ArmorTank(
+                    pos[0],
+                    pos[1],
+                    ConcretePunchingBullet(pos[0], pos[1], 0),
+                    0,
+                    AttackerStrategy(pos[0], pos[1], base_pos.x, base_pos.y),
+                )
             attackers.append(tank)
             tank.get_strategy().find_path(map, (pos[0] // 40, pos[1] // 40), tuple_base_pos)
 
@@ -254,6 +254,8 @@ def start_level(map: list, level_num: str) -> States:
             chasers.append(tank)
     else:
         data = load_data()
+        if data is None:
+            raise RuntimeError("Не удалось загрузить данные уровня. Файл savegame.pkl отсутствует или поврежден.")
         lets = data["lets"]
         for let in lets:
             let.__post_init__()
@@ -265,17 +267,25 @@ def start_level(map: list, level_num: str) -> States:
             tank.get_strategy().load_image()
         for tank in patrol_tanks:
             tank[0].get_strategy().load_image()
-        bonus_pos = data["bonus"]
+        bonus_pos_typed: Optional[Dict[str, Tuple[int, int]]] = data.get("bonus")
+
         bonus = []
-        if "speed" in bonus_pos:
-            speed_rect = speed_image.get_rect(center=(bonus_pos["speed"][0], bonus_pos["speed"][1]))
-            bonus.append((speed_image, speed_rect, "speed"))
-        if "armor" in bonus_pos:
-            armor_rect = armor_image.get_rect(center=(bonus_pos["armor"][0], bonus_pos["armor"][1]))
-            bonus.append((armor_image, armor_rect, "armor"))
-        if "health" in bonus_pos:
-            health_rect = health_image.get_rect(center=(bonus_pos["health"][0], bonus_pos["health"][1]))
-            bonus.append((health_image, health_rect, "health"))
+
+        if isinstance(bonus_pos_typed, dict):
+            if "speed" in bonus_pos_typed and bonus_pos_typed["speed"] is not None:
+                speed_coords = bonus_pos_typed["speed"]
+                speed_rect = speed_image.get_rect(center=(speed_coords[0], speed_coords[1]))
+                bonus.append((speed_image, speed_rect, "speed"))
+
+            if "armor" in bonus_pos_typed and bonus_pos_typed["armor"] is not None:
+                armor_coords = bonus_pos_typed["armor"]
+                armor_rect = armor_image.get_rect(center=(armor_coords[0], armor_coords[1]))
+                bonus.append((armor_image, armor_rect, "armor"))
+
+            if "health" in bonus_pos_typed and bonus_pos_typed["health"] is not None:
+                health_coords = bonus_pos_typed["health"]
+                health_rect = health_image.get_rect(center=(health_coords[0], health_coords[1]))
+                bonus.append((health_image, health_rect, "health"))
         level_num = data["level_num"]
         base_tuple_pos = data["base_pos"]
         base_pos = base_image.get_rect(
@@ -334,7 +344,8 @@ def start_level(map: list, level_num: str) -> States:
             pygame.display.flip()
             continue
         else:
-            screen.blit(base_image, base_pos)
+            if base_pos is not None:
+                screen.blit(base_image, base_pos)
 
         if back_pos.collidepoint(mouse_pos):
             if pygame.mouse.get_pressed()[0]:
@@ -374,6 +385,7 @@ def start_level(map: list, level_num: str) -> States:
                 if let.get_strength() <= 0:
                     lets.remove(let)
                     update_chaser = True
+
                     map[let.get_y() // 40] = (
                         map[let.get_y() // 40][: (let.get_x() // 40)]
                         + " "
@@ -500,26 +512,27 @@ def start_level(map: list, level_num: str) -> States:
             (player_tank.get_x() - 35, player_tank.get_y() - 70, player_tank.get_armor(), 10),
         )
 
-        if (armor_image, armor_rect, "armor") in bonus:
+        if (armor_image, armor_rect, "armor") in bonus and armor_rect is not None:
             if new_rect.colliderect(armor_rect):
                 player_tank.set_armor(80)
                 armor_sound.play()
                 bonus.remove((armor_image, armor_rect, "armor"))
 
-        if (speed_image, speed_rect, "speed") in bonus:
+        if (speed_image, speed_rect, "speed") in bonus and speed_rect is not None:
             if new_rect.colliderect(speed_rect):
                 player_tank.set_speed(3)
                 speed_sound.play()
                 bonus.remove((speed_image, speed_rect, "speed"))
 
-        if (health_image, health_rect, "health") in bonus:
+        if (health_image, health_rect, "health") in bonus and health_rect is not None:
             if new_rect.colliderect(health_rect):
                 player_tank.set_health_point(100)
                 health_sound.play()
                 bonus.remove((health_image, health_rect, "health"))
 
         for bon in bonus:
-            screen.blit(bon[0], bon[1])
+            if bon[1] is not None:
+                screen.blit(bon[0], bon[1])
         for flame in flames:
             if time.time() - flame[1] <= 2:
                 screen.blit(flame_image, flame[0])

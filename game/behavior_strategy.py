@@ -1,6 +1,7 @@
 import heapq
 import math
 from collections import deque
+from typing import List, Tuple, Optional, Dict
 
 import pygame
 
@@ -10,7 +11,11 @@ import pygame
 
 
 class PatrolStrategy:
-    def __init__(self, x: int, y: int, fin_x: int, fin_y):
+    """
+    Класс со стратегией патрулирования местности
+    """
+
+    def __init__(self, x: float, y: float, fin_x: int, fin_y: int):
         """
         Инициализирует объект стратегии патрулирования.
         :param x: Начальная координата X танка (int).
@@ -29,29 +34,29 @@ class PatrolStrategy:
         self._fin_x = fin_x
         self._fin_y = fin_y
         self._angle = 0
-        self._image = None
-        self._transform_image = None
+        self._image: Optional[pygame.Surface] = None
+        self._transform_image: Optional[pygame.Surface] = None
         self._current_axis = "_x"  # Текущая ось движения ('_x' или '_y')
         self.load_image()
 
-    def load_image(self):
+    def load_image(self) -> None:
         """Загружает изображение"""
         self._image = pygame.image.load(r"C:\Users\Geshka\PycharmProjects\Battle_City\game_images\opponent_tank.png")
         self._transform_image = pygame.transform.scale(self._image, (75, 75))
 
-    def get_x(self) -> int:
+    def get_x(self) -> float:
         """Геттер"""
         return self._x
 
-    def set_x(self, x: int):
+    def set_x(self, x: int) -> None:
         """Сеттер"""
         self._x = x
 
-    def get_y(self) -> int:
+    def get_y(self) -> float:
         """Геттер"""
         return self._y
 
-    def set_y(self, y: int):
+    def set_y(self, y: int) -> None:
         """Сеттер"""
         self._y = y
 
@@ -59,11 +64,11 @@ class PatrolStrategy:
         """Геттер"""
         return self._angle
 
-    def get_transform_image(self) -> pygame.transform:
+    def get_transform_image(self) -> Optional[pygame.Surface]:
         """Геттер"""
         return self._transform_image
 
-    def update(self, screen: pygame.Surface, speed: float, hp: int, armor: int) -> int or None:
+    def update(self, screen: pygame.Surface, speed: float, hp: int, armor: int) -> Optional[int]:
         """
         Обновляет положение танка на экране и его состояние.
         :param screen: Экран, на котором отображается танк (pygame.Surface).
@@ -97,6 +102,8 @@ class PatrolStrategy:
             else:
                 self._current_axis = "_x"
 
+        if self._transform_image is None:
+            return None
         rotated_tank = pygame.transform.rotate(self._transform_image, self._angle)
         rect = rotated_tank.get_rect(center=(int(self._x), int(self._y)))
         pygame.draw.rect(screen, "red", (self._x - 35, self._y - 55, hp, 10))
@@ -105,19 +112,21 @@ class PatrolStrategy:
 
         if abs(self._x - self._fin_x) < 1 and abs(self._y - self._fin_y) < 1:
             return -1
+        return None
 
-    def set_new_point(self, x: int, y: int):
+    def set_new_point(self, x: int, y: int) -> None:
         """
         Устанавливает новую конечную точку для патрулирования.
         :param x: Новая целевая координата X (int).
-        :param y: Новая целевая координата Y (int).
-        Действия:
-            - Обновляет атрибуты self._fin_x и self._fin_y.
-             - Сбрасывает текущую ось движения на "_x".
+        :param y: Новая целевая координата Y
         """
         self._fin_x = x
         self._fin_y = y
         self._current_axis = "_x"
+
+
+Pos = Tuple[int, int]
+MapData = List[str]
 
 
 class AttackerStrategy:
@@ -125,7 +134,7 @@ class AttackerStrategy:
     Класс со стратегией пробивания к базе игрока
     """
 
-    def __init__(self, x: int, y: int, fin_x: int, fin_y: int):
+    def __init__(self, x: float, y: float, fin_x: int, fin_y: int):
         """
         Инициализирует объект стратегии атакующего танка.
         :param x: Начальная координата X танка (int).
@@ -145,31 +154,31 @@ class AttackerStrategy:
         self._fin_x = fin_x
         self._fin_y = fin_y
         self._angle = 0
-        self._image = None
-        self._transform_image = None
+        self._image: Optional[pygame.Surface] = None
+        self._transform_image: Optional[pygame.Surface] = None
         self._old_x = x
         self._old_y = y
-        self._path = None
+        self._path: Optional[List[Pos]] = None
         self.load_image()
 
-    def load_image(self):
+    def load_image(self) -> None:
         """Загружает изображение"""
         self._image = pygame.image.load(r"C:\Users\Geshka\PycharmProjects\Battle_City\game_images\opponent_tank.png")
         self._transform_image = pygame.transform.scale(self._image, (75, 75))
 
-    def get_x(self) -> int:
+    def get_x(self) -> float:
         """Геттер"""
         return self._x
 
-    def set_x(self, x: int):
+    def set_x(self, x: int) -> None:
         """Сеттер"""
         self._x = x
 
-    def get_y(self) -> int:
+    def get_y(self) -> float:
         """Геттер"""
         return self._y
 
-    def set_y(self, y: int):
+    def set_y(self, y: int) -> None:
         """Сеттер"""
         self._y = y
 
@@ -177,43 +186,39 @@ class AttackerStrategy:
         """Геттер"""
         return self._angle
 
-    def get_transform_image(self) -> pygame.transform:
+    def get_transform_image(self) -> Optional[pygame.Surface]:
         """Геттер"""
         return self._transform_image
 
-    def get_old_x(self) -> int:
+    def get_old_x(self) -> float:
         """Геттер"""
         return self._old_x
 
-    def get_old_y(self) -> int:
+    def get_old_y(self) -> float:
         """Геттер"""
         return self._old_y
 
-    def find_path(self, map_data: list, start: int, end: int, tank_size=75, cell_size=40) -> list or None:
+    def find_path(
+        self, map_data: MapData, start: Pos, end: Pos, tank_size: int = 75, cell_size: int = 40
+    ) -> Optional[List[Pos]]:
         """
-        Находит путь для танка размером tank_size _x tank_size в
-        лабиринте map_data,
+        Находит путь для танка размером tank_size _x tank_size в лабиринте map_data,
         учитывая, что танк центрируется по середине.
-
         :param map_data: Список строк, представляющий лабиринт.
         :param start: Кортеж (_x, _y) — начальная точка (центр танка).
         :param end: Кортеж (_x', _y') — конечная точка (центр танка).
         :param tank_size: Размер танка (в пикселях).
         :param cell_size: Размер одной клетки лабиринта (в пикселях).
-        :return: Список кортежей, представляющих путь, или None,
-         если путь не существует.
+        :return: Список кортежей, представляющих путь, или None, если путь не существует.
         """
         obstacles = set("bripw")
-
         queue = deque([(start[0], start[1])])
         visited = set([(start[0], start[1])])
-        parent = {}
-
+        parent: Dict[Pos, Pos] = {}
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
         while queue:
             x, y = queue.popleft()
-
             if (x, y) == end:
                 path = []
                 while (x, y) in parent:
@@ -221,22 +226,20 @@ class AttackerStrategy:
                     x, y = parent[(x, y)]
                 path.append((start[0] * cell_size, start[1] * cell_size))
                 self._path = path[::-1]
-                self._fin_x = self._path[0][0]
-                self._fin_y = self._path[0][1]
-                del self._path[0]
+                if self._path:
+                    self._fin_x = self._path[0][0]
+                    self._fin_y = self._path[0][1]
+                    del self._path[0]
+                return self._path
 
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
-
                 if 0 <= nx < len(map_data[0]) and 0 <= ny < len(map_data):
-
                     is_clear = True
-
                     tank_left = nx * cell_size - tank_size // 2
                     tank_right = tank_left + tank_size
                     tank_top = ny * cell_size - tank_size // 2
                     tank_bottom = tank_top + tank_size
-
                     min_cell_x = max(0, tank_left // cell_size)
                     max_cell_x = min(len(map_data[0]) - 1, tank_right // cell_size)
                     min_cell_y = max(0, tank_top // cell_size)
@@ -254,8 +257,9 @@ class AttackerStrategy:
                         visited.add((nx, ny))
                         parent[(nx, ny)] = (x, y)
                         queue.append((nx, ny))
+        return None
 
-    def update(self, screen: pygame.Surface, speed: float, hp: int, armor: int):
+    def update(self, screen: pygame.Surface, speed: float, hp: int, armor: int) -> None:
         """
         Обновляет положение танка на экране и его состояние.
         :param screen: Экран, на котором отображается танк (pygame.Surface).
@@ -267,25 +271,28 @@ class AttackerStrategy:
             - Отображает танк на экране с учетом угла поворота.
             - Обновляет координаты танка в зависимости от текущей цели.
         """
-        if len(self._path) != 0 and (self._fin_x == self._x) and (self._fin_y == self._y):
+        if self._path and len(self._path) != 0 and (self._fin_x == self._x) and (self._fin_y == self._y):
             self._fin_x = self._path[0][0]
             self._fin_y = self._path[0][1]
             del self._path[0]
+
         self._old_x = self._x
         self._old_y = self._y
+
         if self._x < self._fin_x:
             self._x += speed
             self._angle = -90
         elif self._x > self._fin_x:
             self._x -= speed
             self._angle = 90
-
         elif self._y < self._fin_y:
             self._y += speed
             self._angle = 180
-        elif self._y >= self._fin_y:
+        else:
             self._y -= speed
             self._angle = 0
+        if self._transform_image is None:
+            return
 
         rotated_tank = pygame.transform.rotate(self._transform_image, self._angle)
         rect = rotated_tank.get_rect(center=(int(self._x), int(self._y)))
@@ -294,12 +301,15 @@ class AttackerStrategy:
         screen.blit(rotated_tank, rect)
 
 
+Grid = List[List[int]]
+
+
 class ChaserStrategy:
     """
     Класс со стратегией преследования игрока
     """
 
-    def __init__(self, x: int, y: int, map_data: list):
+    def __init__(self, x: int, y: int, map_data: MapData):
         """
         Инициализирует объект стратегии преследования игрока.
         :param x: Начальная координата X танка (int).
@@ -317,17 +327,17 @@ class ChaserStrategy:
         self._x = x
         self._y = y
         self._angle = 0
-        self._grid = None
-        self._path = None
+        self._grid: Optional[Grid] = None
+        self._path: Optional[List[Pos]] = None
         self._target_x = x
         self._target_y = y
         self._updatable = False
         self.create_grid(map_data)
-        self._image = None
-        self._transform_image = None
+        self._image: Optional[pygame.Surface] = None
+        self._transform_image: Optional[pygame.Surface] = None
         self.load_image()
 
-    def load_image(self):
+    def load_image(self) -> None:
         """Загружает изображение"""
         self._image = pygame.image.load(r"C:\Users\Geshka\PycharmProjects\Battle_City\game_images\opponent_tank.png")
         self._transform_image = pygame.transform.scale(self._image, (75, 75))
@@ -336,7 +346,7 @@ class ChaserStrategy:
         """Геттер"""
         return self._x
 
-    def set_x(self, x: int):
+    def set_x(self, x: int) -> None:
         """Сеттер"""
         self._x = x
 
@@ -344,7 +354,7 @@ class ChaserStrategy:
         """Геттер"""
         return self._y
 
-    def set_y(self, y: int):
+    def set_y(self, y: int) -> None:
         """Сеттер"""
         self._y = y
 
@@ -352,15 +362,15 @@ class ChaserStrategy:
         """Геттер"""
         return self._angle
 
-    def get_transform_image(self) -> pygame.transform:
+    def get_transform_image(self) -> Optional[pygame.Surface]:
         """Геттер"""
         return self._transform_image
 
-    def set_updatable(self, updatable: bool):
+    def set_updatable(self, updatable: bool) -> None:
         """Сеттер"""
         self._updatable = updatable
 
-    def create_grid(self, map_data: list):
+    def create_grid(self, map_data: MapData) -> None:
         """
         Создает сетку карты на основе данных лабиринта.
         :param map_data: Карта лабиринта, представленная списком строк.
@@ -379,7 +389,7 @@ class ChaserStrategy:
             grid.append(grid_row)
         self._grid = grid
 
-    def heuristic(self, a: tuple, b: tuple) -> int:
+    def heuristic(self, a: Pos, b: Pos) -> int:
         """
         Вычисляет эвристическое расстояние между двумя точками.
         :param a: Координаты первой точки (x1, y1).
@@ -388,7 +398,7 @@ class ChaserStrategy:
         """
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-    def a_star_search(self, start: tuple, goal: tuple) -> list or None:
+    def a_star_search(self, start: Pos, goal: Pos) -> Optional[List[Pos]]:
         """
         Находит путь к цели с использованием алгоритма A*.
         :param start: Начальные координаты (_x, _y).
@@ -396,23 +406,20 @@ class ChaserStrategy:
         :return: Список координат пути или None, если путь не найден.
         """
         neighbors = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        open_set = []
+        open_set: List[Tuple[int, Pos]] = []
         heapq.heappush(open_set, (0, start))
-        came_from = {}
+        came_from: Dict[Pos, Pos] = {}
         g_score = {start: 0}
         f_score = {start: self.heuristic(start, goal)}
-
         closest_point = None
         closest_distance = float("inf")
 
         while open_set:
             current = heapq.heappop(open_set)[1]
-
             distance_to_goal = self.heuristic(current, goal)
             if distance_to_goal < closest_distance:
                 closest_distance = distance_to_goal
                 closest_point = current
-
             if current == goal:
                 path = []
                 while current in came_from:
@@ -420,21 +427,19 @@ class ChaserStrategy:
                     current = came_from[current]
                 path.reverse()
                 return path
-
             for dx, dy in neighbors:
                 neighbor = (current[0] + dx, current[1] + dy)
                 tentative_g_score = g_score[current] + 1
-
+                if self._grid is None:
+                    return None
                 if 0 <= neighbor[0] < len(self._grid) and 0 <= neighbor[1] < len(self._grid[0]):
                     if not self.can_stand_at(neighbor[0], neighbor[1]):
                         continue
-
                     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                         came_from[neighbor] = current
                         g_score[neighbor] = tentative_g_score
                         f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
                         heapq.heappush(open_set, (f_score[neighbor], neighbor))
-
         if closest_point:
             path = []
             current = closest_point
@@ -443,14 +448,13 @@ class ChaserStrategy:
                 current = came_from[current]
             path.reverse()
             return path
-
         return None
 
-    def is_valid_move(self, new_x: int, new_y: int) -> bool:
+    def is_valid_move(self, new_x: float, new_y: float) -> bool:
         """
         Проверяет, можно ли переместиться в заданную точку.
-        :param new_x: Новая координата X (int).
-        :param new_y: Новая координата Y (int).
+        :param new_x: Новая координата X (float).
+        :param new_y: Новая координата Y (float).
         :return: True, если движение возможно; иначе False.
         """
         tank_size = 75
@@ -461,10 +465,11 @@ class ChaserStrategy:
             (new_x - half_size, new_y + half_size),
             (new_x + half_size, new_y + half_size),
         ]
-
         for px, py in points_to_check:
-            grid_y = py // 40
-            grid_x = px // 40
+            grid_y = int(py) // 40
+            grid_x = int(px) // 40
+            if self._grid is None:
+                return False
             if not (0 <= grid_y < len(self._grid) and 0 <= grid_x < len(self._grid[0])):
                 return False
             if self._grid[grid_y][grid_x] == 1:
@@ -482,24 +487,24 @@ class ChaserStrategy:
         half = tank_size // 2
         center_x = j * 40 + 20
         center_y = i * 40 + 20
-
         corners = [
             (center_x - half, center_y - half),
             (center_x + half, center_y - half),
             (center_x - half, center_y + half),
             (center_x + half, center_y + half),
         ]
-
         for px, py in corners:
-            grid_i = py // 40
-            grid_j = px // 40
+            grid_i = int(py) // 40
+            grid_j = int(px) // 40
+            if self._grid is None:
+                return False
             if not (0 <= grid_i < len(self._grid) and 0 <= grid_j < len(self._grid[0])):
                 return False
             if self._grid[grid_i][grid_j] == 1:
                 return False
         return True
 
-    def update(self, screen: pygame.Surface, speed: float, hp: int, armor: int, player_x: int, player_y: int):
+    def update(self, screen: pygame.Surface, speed: float, hp: int, armor: int, player_x: int, player_y: int) -> None:
         """
         Обновляет положение танка на экране и его состояние.
         :param screen: Экран, на котором отображается танк (pygame.Surface).
@@ -515,33 +520,25 @@ class ChaserStrategy:
         """
         start = (self._y // 40, self._x // 40)
         goal = (player_y // 40, player_x // 40)
-
         if not self._path or (self._target_x, self._target_y) == (self._x, self._y) or self._updatable:
             self._path = self.a_star_search(start, goal)
-
             if self._path:
                 next_step = self._path[0]
                 self._target_x = next_step[1] * 40
                 self._target_y = next_step[0] * 40
-
         if self._path:
             dx = self._target_x - self._x
             dy = self._target_y - self._y
-
-            move_x, move_y = 0, 0
+            move_x, move_y = 0.0, 0.0
             if abs(dx) > 0:
                 move_x = speed if dx > 0 else -speed
             else:
                 move_y = speed if dy > 0 else -speed
-
             if self.is_valid_move(self._x + move_x, self._y + move_y):
-                self._x += move_x
-                self._y += move_y
-
+                self._x += int(move_x)
+                self._y += int(move_y)
             if move_x != 0 or move_y != 0:
-
-                self._angle = math.degrees(math.atan2(-dy, dx))
-
+                self._angle = int(math.degrees(math.atan2(-dy, dx)))
                 if move_x > 0:
                     self._angle = -90
                 elif move_x < 0:
@@ -552,6 +549,8 @@ class ChaserStrategy:
                     self._angle = 0
         self._updatable = False
 
+        if self._transform_image is None:
+            return
         rotated_tank = pygame.transform.rotate(self._transform_image, self._angle)
         rect = rotated_tank.get_rect(center=(int(self._x), int(self._y)))
         pygame.draw.rect(screen, "red", (self._x - 35, self._y - 55, hp, 10))
