@@ -1,5 +1,7 @@
 import ctypes
+import os
 import time
+from typing import Any, Optional, Dict, Tuple
 
 import pygame.transform
 from behavior_strategy import AttackerStrategy, ChaserStrategy, PatrolStrategy
@@ -7,18 +9,21 @@ from bullets import ConcretePunchingBullet, DefaultBullet, IncendiaryBullet, Pla
 from cyclicIterator import CyclicIterator
 from let import Brick, Ice, Plant, Rock, Water
 from loading_screen import transition_screen
+from pause import pause
 from states import States
 from tank import ArmorTank, FastTank, PlayerTank, RapidFireTank, WeakTank
 
+from game.load_data import load_data
+from game.save import save
 
-def start_level(map: list, level_num: str) -> States:
+
+def start_level(map: list[str] | None, level_num: str) -> States:
     """
     Запускает уровень
     :param map: карта уровня
     :param level_num: номер уровня
     :return: статус игры
     """
-    map = [row[:] for row in map]
     SPAWN_X = None
     SPAWN_Y = None
     let_size = 40
@@ -31,6 +36,21 @@ def start_level(map: list, level_num: str) -> States:
     pygame.display.set_caption("Battle City")
     running = True
     transition_screen(screen)
+
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    shoot_music_path = os.path.join(base_dir, "sounds", "shoot.mp3")
+    shoot_sound = pygame.mixer.Sound(shoot_music_path)
+    armor_music_path = os.path.join(base_dir, "sounds", "armor.wav")
+    armor_sound = pygame.mixer.Sound(armor_music_path)
+    health_music_path = os.path.join(base_dir, "sounds", "health.wav")
+    health_sound = pygame.mixer.Sound(health_music_path)
+    speed_music_path = os.path.join(base_dir, "sounds", "speed.wav")
+    speed_sound = pygame.mixer.Sound(speed_music_path)
+    win_music_path = os.path.join(base_dir, "sounds", "win.wav")
+    win_sound = pygame.mixer.Sound(win_music_path)
+    lost_music_path = os.path.join(base_dir, "sounds", "lost.wav")
+    lost_sound = pygame.mixer.Sound(lost_music_path)
+    play_sound = False
 
     load_armor_image = pygame.image.load("../game_images/armor.png")
     armor_image = pygame.transform.scale(load_armor_image, (50, 50))
@@ -73,6 +93,10 @@ def start_level(map: list, level_num: str) -> States:
     back_image_lost = pygame.transform.scale(load_back_image, (250, 250))
     back_image_lost_rect = back_image_lost.get_rect(center=(width // 2, (height * 4) // 5))
 
+    load_pause_image = pygame.image.load("../game_images/pause.png")
+    pause_image = pygame.transform.scale(load_pause_image, (50, 50))
+    pause_rect = pause_image.get_rect(topleft=(100, 0))
+
     load_next_image = pygame.image.load("../game_images/next_button.png")
     next_image = pygame.transform.scale(load_next_image, (250, 125))
     next_rect = next_image.get_rect(center=(width // 2, (height * 3) // 5))
@@ -95,129 +119,185 @@ def start_level(map: list, level_num: str) -> States:
     tuple_base_pos = None
     attackers_pos = []
     chaser_pos = []
-
-    for y in range(height // let_size):
-        for x in range(width // let_size):
-            if map[y][x] == "b" and (x == 0 or y == 0 or x == width // let_size - 1 or y == height // let_size - 1):
-                lets.append(Brick(999, x * let_size, y * let_size))
-            elif map[y][x] == "b" or map[y][x] == "s":
-                lets.append(Brick(3, x * let_size, y * let_size))
-            elif map[y][x] == "i":
-                lets.append(Ice(2, x * let_size, y * let_size))
-            elif map[y][x] == "r":
-                lets.append(Rock(5, x * let_size, y * let_size))
-            elif map[y][x] == "p":
-                lets.append(Plant(1, x * let_size, y * let_size))
-            elif map[y][x] == "w":
-                lets.append(Water(999, x * let_size, y * let_size))
-            elif map[y][x] == "d":
-                tuple_base_pos = (x, y)
-                base_pos = base_image.get_rect(
-                    center=(
-                        x * let_size + let_size // 2,
-                        y * let_size + let_size // 2,
-                    )
-                )
-            elif map[y][x] == "u":
-                SPAWN_X = x * let_size + let_size // 2
-                SPAWN_Y = y * let_size + let_size // 2
-                player_tank.set_x(x * let_size + let_size // 2)
-                player_tank.set_y(y * let_size + let_size // 2)
-            elif map[y][x] == "!":
-                patrol1.append((x * let_size, y * let_size))
-            elif map[y][x] == "@":
-                patrol2.append((x * let_size, y * let_size))
-            elif map[y][x] == "#":
-                patrol3.append((x * let_size, y * let_size))
-            elif map[y][x] == "$":
-                patrol4.append((x * let_size, y * let_size))
-            elif map[y][x] == "2":
-                attackers_pos.append((x * let_size, y * let_size))
-            elif map[y][x] == "3":
-                chaser_pos.append((x * let_size, y * let_size))
-            elif map[y][x] == "v":
-                speed_rect = speed_image.get_rect(center=(x * let_size, y * let_size))
-            elif map[y][x] == "a":
-                armor_rect = armor_image.get_rect(center=(x * let_size, y * let_size))
-            elif map[y][x] == "h":
-                health_rect = health_image.get_rect(center=(x * let_size, y * let_size))
-
-    bonus = [
-        (speed_image, speed_rect),
-        (armor_image, armor_rect),
-        (health_image, health_rect),
-    ]
-
     bullets = []
-    start_time = 0
-
-    patrol_tanks = []
-
-    patrol_tank1 = FastTank(
-        patrol1[0][0],
-        patrol1[0][1],
-        DefaultBullet(patrol1[0][0], patrol1[0][1], 0),
-        0,
-        PatrolStrategy(patrol1[0][0], patrol1[0][1], patrol1[1][0], patrol1[1][1]),
-    )
-    iterator1 = CyclicIterator(patrol1)
-    patrol_tanks.append((patrol_tank1, iterator1))
-
-    patrol_tank2 = ArmorTank(
-        patrol2[0][0],
-        patrol2[0][1],
-        DefaultBullet(patrol2[0][0], patrol2[0][1], 0),
-        0,
-        PatrolStrategy(patrol2[0][0], patrol2[0][1], patrol2[1][0], patrol2[1][1]),
-    )
-    iterator2 = CyclicIterator(patrol2)
-    patrol_tanks.append((patrol_tank2, iterator2))
-
-    patrol_tank3 = WeakTank(
-        patrol3[0][0],
-        patrol3[0][1],
-        DefaultBullet(patrol3[0][0], patrol3[0][1], 0),
-        0,
-        PatrolStrategy(patrol3[0][0], patrol3[0][1], patrol3[1][0], patrol3[1][1]),
-    )
-    iterator3 = CyclicIterator(patrol3)
-    patrol_tanks.append((patrol_tank3, iterator3))
-
-    patrol_tank4 = RapidFireTank(
-        patrol4[0][0],
-        patrol4[0][1],
-        DefaultBullet(patrol4[0][0], patrol4[0][1], 0),
-        0,
-        PatrolStrategy(patrol4[0][0], patrol4[0][1], patrol4[1][0], patrol4[1][1]),
-    )
-    iterator4 = CyclicIterator(patrol4)
-    patrol_tanks.append((patrol_tank4, iterator4))
-
-    attackers = []
-    for pos in attackers_pos:
-        tank = ArmorTank(
-            pos[0],
-            pos[1],
-            ConcretePunchingBullet(pos[0], pos[1], 0),
-            0,
-            AttackerStrategy(pos[0], pos[1], base_pos.x, base_pos.y),
-        )
-        attackers.append(tank)
-        tank.get_strategy().find_path(map, (pos[0] // 40, pos[1] // 40), tuple_base_pos)
-
-    chasers = []
+    start_time: float = 0
     update_chaser = False
-    flames = []
+    flames: list[Any] = []
+    speed_pos = None
+    health_pos = None
+    armor_pos = None
 
-    for pos in chaser_pos:
-        tank = WeakTank(
-            pos[0],
-            pos[1],
-            IncendiaryBullet(pos[0], pos[1], 0),
+    if map is not None:
+        map = [row[:] for row in map]
+        for y in range(height // let_size):
+            for x in range(width // let_size):
+                if map[y][x] == "b" and (x == 0 or y == 0 or x == width // let_size - 1 or y == height // let_size - 1):
+                    lets.append(Brick(999, x * let_size, y * let_size))
+                elif map[y][x] == "b" or map[y][x] == "s":
+                    lets.append(Brick(3, x * let_size, y * let_size))
+                elif map[y][x] == "i":
+                    lets.append(Ice(2, x * let_size, y * let_size))
+                elif map[y][x] == "r":
+                    lets.append(Rock(5, x * let_size, y * let_size))
+                elif map[y][x] == "p":
+                    lets.append(Plant(1, x * let_size, y * let_size))
+                elif map[y][x] == "w":
+                    lets.append(Water(999, x * let_size, y * let_size))
+                elif map[y][x] == "d":
+                    tuple_base_pos = (x, y)
+                    base_pos = base_image.get_rect(
+                        center=(
+                            x * let_size + let_size // 2,
+                            y * let_size + let_size // 2,
+                        )
+                    )
+                elif map[y][x] == "u":
+                    SPAWN_X = x * let_size + let_size // 2
+                    SPAWN_Y = y * let_size + let_size // 2
+                    player_tank.set_x(x * let_size + let_size // 2)
+                    player_tank.set_y(y * let_size + let_size // 2)
+                elif map[y][x] == "!":
+                    patrol1.append((x * let_size, y * let_size))
+                elif map[y][x] == "@":
+                    patrol2.append((x * let_size, y * let_size))
+                elif map[y][x] == "#":
+                    patrol3.append((x * let_size, y * let_size))
+                elif map[y][x] == "$":
+                    patrol4.append((x * let_size, y * let_size))
+                elif map[y][x] == "2":
+                    attackers_pos.append((x * let_size, y * let_size))
+                elif map[y][x] == "3":
+                    chaser_pos.append((x * let_size, y * let_size))
+                elif map[y][x] == "v":
+                    speed_pos = (x * let_size, y * let_size)
+                    speed_rect = speed_image.get_rect(center=(x * let_size, y * let_size))
+                elif map[y][x] == "a":
+                    armor_pos = (x * let_size, y * let_size)
+                    armor_rect = armor_image.get_rect(center=(x * let_size, y * let_size))
+                elif map[y][x] == "h":
+                    health_pos = (x * let_size, y * let_size)
+                    health_rect = health_image.get_rect(center=(x * let_size, y * let_size))
+
+        bonus_pos = {"speed": speed_pos, "armor": armor_pos, "health": health_pos}
+
+        bonus = [
+            (speed_image, speed_rect, "speed"),
+            (armor_image, armor_rect, "armor"),
+            (health_image, health_rect, "health"),
+        ]
+
+        patrol_tanks = []
+
+        patrol_tank1 = FastTank(
+            patrol1[0][0],
+            patrol1[0][1],
+            DefaultBullet(patrol1[0][0], patrol1[0][1], 0),
             0,
-            ChaserStrategy(pos[0], pos[1], map),
+            PatrolStrategy(patrol1[0][0], patrol1[0][1], patrol1[1][0], patrol1[1][1]),
         )
-        chasers.append(tank)
+        iterator1 = CyclicIterator(patrol1)
+        patrol_tanks.append((patrol_tank1, iterator1))
+
+        patrol_tank2 = ArmorTank(
+            patrol2[0][0],
+            patrol2[0][1],
+            DefaultBullet(patrol2[0][0], patrol2[0][1], 0),
+            0,
+            PatrolStrategy(patrol2[0][0], patrol2[0][1], patrol2[1][0], patrol2[1][1]),
+        )
+        iterator2 = CyclicIterator(patrol2)
+        patrol_tanks.append((patrol_tank2, iterator2))
+
+        patrol_tank3 = WeakTank(
+            patrol3[0][0],
+            patrol3[0][1],
+            DefaultBullet(patrol3[0][0], patrol3[0][1], 0),
+            0,
+            PatrolStrategy(patrol3[0][0], patrol3[0][1], patrol3[1][0], patrol3[1][1]),
+        )
+        iterator3 = CyclicIterator(patrol3)
+        patrol_tanks.append((patrol_tank3, iterator3))
+
+        patrol_tank4 = RapidFireTank(
+            patrol4[0][0],
+            patrol4[0][1],
+            DefaultBullet(patrol4[0][0], patrol4[0][1], 0),
+            0,
+            PatrolStrategy(patrol4[0][0], patrol4[0][1], patrol4[1][0], patrol4[1][1]),
+        )
+        iterator4 = CyclicIterator(patrol4)
+        patrol_tanks.append((patrol_tank4, iterator4))
+
+        attackers = []
+        for pos in attackers_pos:
+            if base_pos is not None:
+                tank = ArmorTank(
+                    pos[0],
+                    pos[1],
+                    ConcretePunchingBullet(pos[0], pos[1], 0),
+                    0,
+                    AttackerStrategy(pos[0], pos[1], base_pos.x, base_pos.y),
+                )
+            attackers.append(tank)
+            tank.get_strategy().find_path(map, (pos[0] // 40, pos[1] // 40), tuple_base_pos)
+
+        chasers = []
+
+        for pos in chaser_pos:
+            tank = WeakTank(
+                pos[0],
+                pos[1],
+                IncendiaryBullet(pos[0], pos[1], 0),
+                0,
+                ChaserStrategy(pos[0], pos[1], map),
+            )
+            chasers.append(tank)
+    else:
+        data = load_data()
+        if data is None:
+            raise RuntimeError("Не удалось загрузить данные уровня. Файл savegame.pkl отсутствует или поврежден.")
+        lets = data["lets"]
+        for let in lets:
+            let.__post_init__()
+        player_tank = data["player_tank"]
+        patrol_tanks = data["patrol_tanks"]
+        attackers = data["attackers"]
+        chasers = data["chasers"]
+        for tank in attackers + chasers:
+            tank.get_strategy().load_image()
+        for tank in patrol_tanks:
+            tank[0].get_strategy().load_image()
+        bonus_pos_typed: Optional[Dict[str, Tuple[int, int]]] = data.get("bonus")
+
+        bonus = []
+
+        if isinstance(bonus_pos_typed, dict):
+            if "speed" in bonus_pos_typed and bonus_pos_typed["speed"] is not None:
+                speed_coords = bonus_pos_typed["speed"]
+                speed_rect = speed_image.get_rect(center=(speed_coords[0], speed_coords[1]))
+                bonus.append((speed_image, speed_rect, "speed"))
+
+            if "armor" in bonus_pos_typed and bonus_pos_typed["armor"] is not None:
+                armor_coords = bonus_pos_typed["armor"]
+                armor_rect = armor_image.get_rect(center=(armor_coords[0], armor_coords[1]))
+                bonus.append((armor_image, armor_rect, "armor"))
+
+            if "health" in bonus_pos_typed and bonus_pos_typed["health"] is not None:
+                health_coords = bonus_pos_typed["health"]
+                health_rect = health_image.get_rect(center=(health_coords[0], health_coords[1]))
+                bonus.append((health_image, health_rect, "health"))
+        level_num = data["level_num"]
+        base_tuple_pos = data["base_pos"]
+        base_pos = base_image.get_rect(
+            center=(
+                base_tuple_pos[0] * let_size + let_size // 2,
+                base_tuple_pos[1] * let_size + let_size // 2,
+            )
+        )
+        base_health = data["base_health"]
+        map = data["map"]
+        SPAWN_X = data["SPAWN_X"]
+        SPAWN_Y = data["SPAWN_Y"]
 
     while running:
         screen.fill("black")
@@ -229,6 +309,9 @@ def start_level(map: list, level_num: str) -> States:
         mouse_pos = pygame.mouse.get_pos()
 
         if len(attackers + chasers + patrol_tanks) == 0:
+            if not play_sound:
+                win_sound.play()
+                play_sound = True
             screen.blit(winner, winner_rect)
             screen.blit(replay_button, replay_button_rect)
             screen.blit(back_image_lost, back_image_lost_rect)
@@ -246,6 +329,9 @@ def start_level(map: list, level_num: str) -> States:
             continue
 
         if base_health <= 0:
+            if not play_sound:
+                lost_sound.play()
+                play_sound = True
             screen.blit(game_over, game_rect)
             screen.blit(replay_button, replay_button_rect)
             screen.blit(back_image_lost, back_image_lost_rect)
@@ -258,7 +344,8 @@ def start_level(map: list, level_num: str) -> States:
             pygame.display.flip()
             continue
         else:
-            screen.blit(base_image, base_pos)
+            if base_pos is not None:
+                screen.blit(base_image, base_pos)
 
         if back_pos.collidepoint(mouse_pos):
             if pygame.mouse.get_pressed()[0]:
@@ -287,6 +374,7 @@ def start_level(map: list, level_num: str) -> States:
                 player_tank.get_direction(),
             )
             bullets.append((bullet, 1))
+            shoot_sound.play()
 
         rotated_tank = pygame.transform.rotate(player_tank_image, player_tank.get_direction())
         new_rect = rotated_tank.get_rect(center=(int(player_tank.get_x()), int(player_tank.get_y())))
@@ -297,6 +385,7 @@ def start_level(map: list, level_num: str) -> States:
                 if let.get_strength() <= 0:
                     lets.remove(let)
                     update_chaser = True
+
                     map[let.get_y() // 40] = (
                         map[let.get_y() // 40][: (let.get_x() // 40)]
                         + " "
@@ -423,20 +512,27 @@ def start_level(map: list, level_num: str) -> States:
             (player_tank.get_x() - 35, player_tank.get_y() - 70, player_tank.get_armor(), 10),
         )
 
-        if new_rect.colliderect(armor_rect) and (armor_image, armor_rect) in bonus:
-            player_tank.set_armor(80)
-            bonus.remove((armor_image, armor_rect))
+        if (armor_image, armor_rect, "armor") in bonus and armor_rect is not None:
+            if new_rect.colliderect(armor_rect):
+                player_tank.set_armor(80)
+                armor_sound.play()
+                bonus.remove((armor_image, armor_rect, "armor"))
 
-        if new_rect.colliderect(speed_rect) and (speed_image, speed_rect) in bonus:
-            player_tank.set_speed(3)
-            bonus.remove((speed_image, speed_rect))
+        if (speed_image, speed_rect, "speed") in bonus and speed_rect is not None:
+            if new_rect.colliderect(speed_rect):
+                player_tank.set_speed(3)
+                speed_sound.play()
+                bonus.remove((speed_image, speed_rect, "speed"))
 
-        if new_rect.colliderect(health_rect) and (health_image, health_rect) in bonus:
-            player_tank.set_health_point(100)
-            bonus.remove((health_image, health_rect))
+        if (health_image, health_rect, "health") in bonus and health_rect is not None:
+            if new_rect.colliderect(health_rect):
+                player_tank.set_health_point(100)
+                health_sound.play()
+                bonus.remove((health_image, health_rect, "health"))
 
         for bon in bonus:
-            screen.blit(bon[0], bon[1])
+            if bon[1] is not None:
+                screen.blit(bon[0], bon[1])
         for flame in flames:
             if time.time() - flame[1] <= 2:
                 screen.blit(flame_image, flame[0])
@@ -545,5 +641,28 @@ def start_level(map: list, level_num: str) -> States:
                     if bullet in bullets:
                         bullets.remove(bullet)
                     break
+        if pause_rect.collidepoint(mouse_pos):
+            if pygame.mouse.get_pressed()[0]:
+                flag = pause(screen)
+                if flag:
+                    new_bonus_pos = {}
+                    for b in bonus:
+                        if b[2] in bonus_pos:
+                            new_bonus_pos[b[2]] = bonus_pos[b[2]]
+                    save(
+                        lets,
+                        player_tank,
+                        patrol_tanks,
+                        attackers,
+                        chasers,
+                        new_bonus_pos,
+                        level_num,
+                        tuple_base_pos,
+                        base_health,
+                        map,
+                        SPAWN_X,
+                        SPAWN_Y,
+                    )
+        screen.blit(pause_image, pause_rect)
         screen.blit(back_image_in_game, back_pos)
         pygame.display.flip()

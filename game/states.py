@@ -11,3 +11,4 @@ class States(Enum):
     NEXT_2 = "next2"
     NEXT_3 = "next3"
     NEXT_4 = "next4"
+    SAVE = "save"

@@ -12,6 +12,7 @@ exclude = '''
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 python_version = "3.12"
+exclude = "tests/"
 
 enable_error_code = ["truthy-bool", "ignore-without-code"]
 check_untyped_defs = true

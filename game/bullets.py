@@ -7,34 +7,34 @@ import pygame
 class DefaultBullet:
     """Класс со стандартной пулей"""
 
-    _x: int
-    _y: int
+    _x: float
+    _y: float
     _direction: int
     _bullet_speed: float = 7.5
     _can_break_wall: bool = False
     _fire: bool = False
     _damage: int = 20
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Инициализация дополнительных атрибутов после создания объекта.
         """
         self._bullet_image = pygame.image.load("../game_images/bullet.png")
         self._transform_bullet_image = pygame.transform.scale(self._bullet_image, (30, 15))
 
-    def get_x(self) -> int:
+    def get_x(self) -> float:
         """Геттер"""
         return self._x
 
-    def set_x(self, x: int):
+    def set_x(self, x: int) -> None:
         """Сеттер"""
         self._x = x
 
-    def get_y(self) -> int:
+    def get_y(self) -> float:
         """Геттер"""
         return self._y
 
-    def set_y(self, y: int):
+    def set_y(self, y: int) -> None:
         """Сеттер"""
         self._y = y
 
